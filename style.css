@@ -21,6 +21,28 @@ body {
   gap: 12px;
 }
 
+#settings-btn {
+  display: block;
+
+  width: fit-content;
+
+  margin: 10px auto;
+
+  padding: 8px 14px;
+
+  border: 1px solid #2c3446;
+  border-radius: 6px;
+
+  background: #1c2230;
+  color: #f2f2f2;
+
+  text-decoration: none;
+  font-size: 0.9rem;
+}
+
+#settings-btn:hover {
+  background: #2a3347;
+}
 #hud h1 {
   font-size: 1.4rem;
   margin: 0 0 8px 0;
