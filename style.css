@@ -95,6 +95,41 @@ body {
   background: #5a8dff;
 }
 
+#difficulty-select {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  margin: 6px 0 4px 0;
+}
+
+.difficulty-label {
+  margin: 0;
+  font-size: 0.9rem;
+  opacity: 0.8;
+}
+
+.difficulty-btn {
+  padding: 8px 18px;
+  margin: 0 4px;
+  font-size: 0.95rem;
+  border: 2px solid #2c3446;
+  border-radius: 6px;
+  background: #1c2230;
+  color: #f2f2f2;
+  cursor: pointer;
+}
+
+.difficulty-btn:hover {
+  border-color: #4a5578;
+}
+
+.difficulty-btn.selected {
+  background: #3f7cf6;
+  border-color: #5a8dff;
+  color: white;
+}
+
 #input-row {
   display: flex;
   justify-content: center;
