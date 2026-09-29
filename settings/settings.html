@@ -1,0 +1,170 @@
+```html
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Game Settings</title>
+  <link rel="stylesheet" href="settings.css">
+</head>
+
+<body>
+
+  <main class="settings-container">
+
+    <div class="settings-header">
+      <h1>⚙️ Game Settings</h1>
+      <p>Customize your Falling Word experience</p>
+    </div>
+
+    <section class="settings-card">
+
+      <!-- Difficulty -->
+      <div class="setting-item">
+        <div>
+          <h2>Difficulty</h2>
+          <p>Choose the overall game difficulty.</p>
+        </div>
+
+        <select id="difficulty">
+          <option value="easy">Easy</option>
+          <option value="normal">Normal</option>
+          <option value="hard">Hard</option>
+        </select>
+      </div>
+
+      <!-- Speed -->
+      <div class="setting-item">
+        <div>
+          <h2>Game Speed</h2>
+          <p>Control how fast the words fall.</p>
+        </div>
+
+        <div class="range-control">
+          <input
+            type="range"
+            id="speed"
+            min="0.5"
+            max="2"
+            step="0.1"
+            value="1"
+          >
+
+          <span id="speed-value">1.0x</span>
+        </div>
+      </div>
+
+      <!-- Word Size -->
+      <div class="setting-item">
+        <div>
+          <h2>Word Size</h2>
+          <p>Change the size of falling words.</p>
+        </div>
+
+        <div class="range-control">
+          <input
+            type="range"
+            id="word-size"
+            min="0.7"
+            max="2"
+            step="0.1"
+            value="1"
+          >
+
+          <span id="word-size-value">1.0x</span>
+        </div>
+      </div>
+
+      <!-- Spawn Rate -->
+      <div class="setting-item">
+        <div>
+          <h2>Spawn Rate</h2>
+          <p>Control how frequently new words appear.</p>
+        </div>
+
+        <div class="range-control">
+          <input
+            type="range"
+            id="spawn-rate"
+            min="0.5"
+            max="2"
+            step="0.1"
+            value="1"
+          >
+
+          <span id="spawn-rate-value">1.0x</span>
+        </div>
+      </div>
+
+      <!-- Starting Lives -->
+      <div class="setting-item">
+        <div>
+          <h2>Starting Lives</h2>
+          <p>Choose how many lives you start with.</p>
+        </div>
+
+        <select id="lives">
+          <option value="1">1 Life</option>
+          <option value="2">2 Lives</option>
+          <option value="3">3 Lives</option>
+          <option value="4">4 Lives</option>
+          <option value="5">5 Lives</option>
+          <option value="6">6 Lives</option>
+          <option value="7">7 Lives</option>
+          <option value="8">8 Lives</option>
+          <option value="9">9 Lives</option>
+          <option value="10">10 Lives</option>
+        </select>
+      </div>
+
+      <!-- Sound -->
+      <div class="setting-item">
+        <div>
+          <h2>Sound Effects</h2>
+          <p>Enable or disable game sounds.</p>
+        </div>
+
+        <label class="switch">
+          <input type="checkbox" id="sound">
+          <span class="slider"></span>
+        </label>
+      </div>
+
+      <!-- Theme -->
+      <div class="setting-item">
+        <div>
+          <h2>Theme</h2>
+          <p>Choose your preferred interface theme.</p>
+        </div>
+
+        <select id="theme">
+          <option value="dark">Dark</option>
+          <option value="light">Light</option>
+        </select>
+      </div>
+
+    </section>
+
+    <div class="settings-actions">
+      <button id="reset-btn" class="secondary-btn">
+        Reset Settings
+      </button>
+
+      <button id="save-btn" class="primary-btn">
+        Save Settings
+      </button>
+
+      <a href="../index.html" class="back-btn">
+        ← Back to Game
+      </a>
+    </div>
+
+    <p id="save-message"></p>
+
+  </main>
+
+  <script src="settings.js"></script>
+
+</body>
+</html>
+```
