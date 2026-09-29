@@ -39,46 +39,6 @@ const DIFFICULTY_PRESETS = {
     pointsPerLevel: 35
   }
 };
-// =========================================================
-// PLAYER SETTINGS
-// =========================================================
-
-const DEFAULT_PLAYER_SETTINGS = {
-  difficulty: "normal",
-  speed: 1,
-  wordSize: 1,
-  spawnRate: 1,
-  lives: 3,
-  sound: true,
-  theme: "dark"
-};
-
-function loadPlayerSettings() {
-
-  const saved = localStorage.getItem("fallingWordSettings");
-
-  if (!saved) {
-    return DEFAULT_PLAYER_SETTINGS;
-  }
-
-  try {
-
-    return {
-      ...DEFAULT_PLAYER_SETTINGS,
-      ...JSON.parse(saved)
-    };
-
-  } catch (error) {
-
-    console.warn("Could not load player settings.");
-
-    return DEFAULT_PLAYER_SETTINGS;
-  }
-}
-
-const PLAYER_SETTINGS = loadPlayerSettings();
-
-selectedDifficulty = PLAYER_SETTINGS.difficulty;
 
 // Set this to your local CSV path, or swap in your published
 // Google Sheet CSV URL, e.g.:
