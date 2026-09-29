@@ -1,0 +1,124 @@
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  font-family: "Segoe UI", Roboto, Arial, sans-serif;
+  background: #10131a;
+  color: #f2f2f2;
+  display: flex;
+  justify-content: center;
+  min-height: 100vh;
+  padding: 16px;
+}
+
+#app {
+  width: 100%;
+  max-width: 800px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+#hud h1 {
+  font-size: 1.4rem;
+  margin: 0 0 8px 0;
+  text-align: center;
+}
+
+#stats {
+  display: flex;
+  justify-content: space-between;
+  font-size: 1rem;
+  background: #1c2230;
+  padding: 10px 16px;
+  border-radius: 8px;
+}
+
+#game-area {
+  position: relative;
+  width: 100%;
+  height: 60vh;
+  min-height: 320px;
+  background: linear-gradient(180deg, #161c28 0%, #0d1017 100%);
+  border: 2px solid #2c3446;
+  border-radius: 10px;
+  overflow: hidden;
+}
+
+.falling-word {
+  position: absolute;
+  top: 0;
+  padding: 4px 10px;
+  border-radius: 6px;
+  font-size: 1.1rem;
+  font-weight: 600;
+  white-space: nowrap;
+  background: #2b3350;
+  border: 1px solid #4a5578;
+  color: #f2f2f2;
+}
+
+.falling-word.easy    { background: #1f4d3a; border-color: #2f8f63; }
+.falling-word.medium  { background: #4d3f1f; border-color: #b98a2f; }
+.falling-word.hard    { background: #4d1f28; border-color: #b9384f; }
+
+.overlay {
+  position: absolute;
+  inset: 0;
+  background: rgba(10, 12, 18, 0.92);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  gap: 10px;
+  padding: 20px;
+}
+
+.overlay.hidden {
+  display: none;
+}
+
+.overlay button {
+  padding: 10px 22px;
+  font-size: 1rem;
+  border: none;
+  border-radius: 6px;
+  background: #3f7cf6;
+  color: white;
+  cursor: pointer;
+}
+
+.overlay button:hover {
+  background: #5a8dff;
+}
+
+#input-row {
+  display: flex;
+  justify-content: center;
+}
+
+#typing-input {
+  width: 100%;
+  max-width: 400px;
+  padding: 12px 14px;
+  font-size: 1.1rem;
+  border-radius: 8px;
+  border: 2px solid #2c3446;
+  background: #1c2230;
+  color: #fff;
+  text-align: center;
+}
+
+#typing-input:disabled {
+  opacity: 0.5;
+}
+
+@media (max-width: 480px) {
+  #hud h1 { font-size: 1.1rem; }
+  #stats { font-size: 0.85rem; padding: 8px 10px; }
+  .falling-word { font-size: 0.95rem; }
+  #game-area { height: 55vh; }
+}
