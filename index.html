@@ -17,11 +17,6 @@
         <span id="level">Level: 1</span>
         <span id="lives">Lives: ❤️❤️❤️</span>
       </div>
-
-      <a href="settings/settings.html" id="settings-btn">
-  ⚙️ Settings
-</a>
-      
     </header>
 
     <main id="game-area">
@@ -30,6 +25,12 @@
       <div id="start-screen" class="overlay">
         <h2>Ready to play?</h2>
         <p>Type each falling word before it reaches the bottom!</p>
+        <div id="difficulty-select">
+          <p class="difficulty-label">Choose a difficulty:</p>
+          <button class="difficulty-btn" data-difficulty="easy">Easy</button>
+          <button class="difficulty-btn selected" data-difficulty="normal">Normal</button>
+          <button class="difficulty-btn" data-difficulty="hard">Hard</button>
+        </div>
         <button id="start-btn">Start Game</button>
       </div>
 
