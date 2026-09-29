@@ -3,15 +3,41 @@
 // =========================================================
 const GAME_CONFIG = {
   pointsPerWord: 10,
-  startingLives: 3,
-  baseSpeed: 1.0,               // pixels per frame at level 1
+  baseSpeed: 1.0,               // pixels per frame at level 1, before difficulty multiplier
   speedIncreasePerLevel: 0.35,
   spawnIntervalMs: 1600,
-  spawnIntervalMinMs: 500,
-  pointsPerLevel: 50,
+  spawnIntervalMinMs: 400,
   fastAnswerBonusMs: 1500,
   fastAnswerBonusPoints: 5,
-  difficultyMultiplier: { easy: 1, medium: 1.5, hard: 2.2 }
+  difficultyMultiplier: { easy: 1, medium: 1.5, hard: 2.2 },
+  noRepeatWindow: 6              // how many recently-used words to avoid repeating
+};
+
+// Difficulty presets — chosen by the player on the start screen.
+// This is separate from a word's own easy/medium/hard difficulty column;
+// this controls the overall game pace (lives, speed, spawn rate, leveling).
+const DIFFICULTY_PRESETS = {
+  easy: {
+    label: "Easy",
+    startingLives: 5,
+    speedMultiplier: 0.75,
+    spawnIntervalMultiplier: 1.3,
+    pointsPerLevel: 70
+  },
+  normal: {
+    label: "Normal",
+    startingLives: 3,
+    speedMultiplier: 1.0,
+    spawnIntervalMultiplier: 1.0,
+    pointsPerLevel: 50
+  },
+  hard: {
+    label: "Hard",
+    startingLives: 2,
+    speedMultiplier: 1.35,
+    spawnIntervalMultiplier: 0.75,
+    pointsPerLevel: 35
+  }
 };
 
 // Set this to your local CSV path, or swap in your published
@@ -23,9 +49,14 @@ const CSV_SOURCE = "data/words.csv";
 const FALLBACK_WORDS = [
   { word: "apple", difficulty: "easy" },
   { word: "computer", difficulty: "easy" },
+  { word: "keyboard", difficulty: "easy" },
+  { word: "window", difficulty: "easy" },
   { word: "javascript", difficulty: "medium" },
   { word: "programming", difficulty: "medium" },
-  { word: "algorithm", difficulty: "hard" }
+  { word: "developer", difficulty: "medium" },
+  { word: "algorithm", difficulty: "hard" },
+  { word: "recursion", difficulty: "hard" },
+  { word: "asynchronous", difficulty: "hard" }
 ];
 
 // =========================================================
@@ -33,13 +64,16 @@ const FALLBACK_WORDS = [
 // =========================================================
 let wordList = [];
 let activeWords = [];       // [{ id, text, difficulty, x, y, speed, spawnTime, el }]
+let recentWords = [];       // last few words used, to avoid picking the same word back-to-back
 let score = 0;
-let lives = GAME_CONFIG.startingLives;
+let lives = 3;
 let level = 1;
 let running = false;
 let animationFrameId = null;
 let spawnTimeoutId = null;
 let nextWordId = 1;
+let selectedDifficulty = "normal";
+let activePreset = DIFFICULTY_PRESETS.normal;
 
 // =========================================================
 // DOM REFERENCES
@@ -56,6 +90,7 @@ const loadErrorScreen = document.getElementById("load-error");
 const startBtn = document.getElementById("start-btn");
 const restartBtn = document.getElementById("restart-btn");
 const dismissErrorBtn = document.getElementById("dismiss-error-btn");
+const difficultyButtons = document.querySelectorAll(".difficulty-btn");
 
 // =========================================================
 // CSV LOADING AND PARSING
@@ -101,7 +136,9 @@ function parseCSV(text) {
 }
 
 // =========================================================
-// WORD SELECTION (weighted more toward harder words at higher levels)
+// WORD SELECTION
+// (weighted more toward harder words at higher levels, and
+//  avoids repeating a word that was just used recently)
 // =========================================================
 function pickRandomWord() {
   const hardChance = Math.min(0.1 + level * 0.06, 0.5);
@@ -119,7 +156,22 @@ function pickRandomWord() {
   }
 
   if (!pool || pool.length === 0) pool = wordList; // safety fallback
-  return pool[Math.floor(Math.random() * pool.length)];
+
+  // Prefer a word that ISN'T in the recent-use list, so the same word
+  // doesn't keep reappearing back-to-back. If every word in the chosen
+  // pool has been used recently (e.g. a very small word list), fall
+  // back to the full pool rather than getting stuck.
+  const freshPool = pool.filter(w => !recentWords.includes(w.word));
+  const finalPool = freshPool.length > 0 ? freshPool : pool;
+
+  const chosen = finalPool[Math.floor(Math.random() * finalPool.length)];
+
+  recentWords.push(chosen.word);
+  if (recentWords.length > GAME_CONFIG.noRepeatWindow) {
+    recentWords.shift(); // forget the oldest entry once the window is full
+  }
+
+  return chosen;
 }
 
 // =========================================================
@@ -142,7 +194,8 @@ function spawnWord() {
   const x = Math.floor(Math.random() * maxX);
   el.style.left = x + "px";
 
-  const speed = GAME_CONFIG.baseSpeed + (level - 1) * GAME_CONFIG.speedIncreasePerLevel;
+  const speed = (GAME_CONFIG.baseSpeed + (level - 1) * GAME_CONFIG.speedIncreasePerLevel)
+    * activePreset.speedMultiplier;
 
   activeWords.push({
     id: nextWordId++,
@@ -160,7 +213,7 @@ function spawnWord() {
 
 function scheduleNextSpawn() {
   const interval = Math.max(
-    GAME_CONFIG.spawnIntervalMs - (level - 1) * 120,
+    (GAME_CONFIG.spawnIntervalMs - (level - 1) * 120) * activePreset.spawnIntervalMultiplier,
     GAME_CONFIG.spawnIntervalMinMs
   );
   spawnTimeoutId = setTimeout(spawnWord, interval);
@@ -237,7 +290,7 @@ function loseLife() {
 }
 
 function updateLevel() {
-  const newLevel = Math.floor(score / GAME_CONFIG.pointsPerLevel) + 1;
+  const newLevel = Math.floor(score / activePreset.pointsPerLevel) + 1;
   if (newLevel !== level) {
     level = newLevel;
   }
@@ -248,17 +301,31 @@ function updateLevel() {
 // =========================================================
 function updateHUD() {
   scoreEl.textContent = "Score: " + score;
-  levelEl.textContent = "Level: " + level;
+  levelEl.textContent = "Level: " + level + " (" + activePreset.label + ")";
   livesEl.textContent = "Lives: " + "❤️".repeat(Math.max(lives, 0));
 }
+
+// =========================================================
+// DIFFICULTY SELECTION (start screen)
+// =========================================================
+difficultyButtons.forEach(btn => {
+  btn.addEventListener("click", () => {
+    selectedDifficulty = btn.dataset.difficulty;
+    difficultyButtons.forEach(b => b.classList.remove("selected"));
+    btn.classList.add("selected");
+  });
+});
 
 // =========================================================
 // GAME LIFECYCLE
 // =========================================================
 function startGame() {
+  activePreset = DIFFICULTY_PRESETS[selectedDifficulty] || DIFFICULTY_PRESETS.normal;
+
   score = 0;
-  lives = GAME_CONFIG.startingLives;
+  lives = activePreset.startingLives;
   level = 1;
+  recentWords = [];
   activeWords.forEach(w => w.el.remove());
   activeWords = [];
   running = true;
