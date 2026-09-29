@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Falling Word Typing Game</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+  <div id="app">
+
+    <header id="hud">
+      <h1>⌨️ Falling Word Typing Game</h1>
+      <div id="stats">
+        <span id="score">Score: 0</span>
+        <span id="level">Level: 1</span>
+        <span id="lives">Lives: ❤️❤️❤️</span>
+      </div>
+    </header>
+
+    <main id="game-area">
+      <!-- Falling word elements are inserted here by JavaScript -->
+
+      <div id="start-screen" class="overlay">
+        <h2>Ready to play?</h2>
+        <p>Type each falling word before it reaches the bottom!</p>
+        <button id="start-btn">Start Game</button>
+      </div>
+
+      <div id="game-over-screen" class="overlay hidden">
+        <h2>Game Over</h2>
+        <p id="final-score">Final Score: 0</p>
+        <button id="restart-btn">Restart Game</button>
+      </div>
+
+      <div id="load-error" class="overlay hidden">
+        <h2>Couldn't load word list</h2>
+        <p>Using a small built-in word list instead. Check your CSV source in script.js.</p>
+        <button id="dismiss-error-btn">Continue</button>
+      </div>
+    </main>
+
+    <div id="input-row">
+      <input type="text" id="typing-input" placeholder="Type here..." autocomplete="off" disabled>
+    </div>
+
+  </div>
+
+  <script src="script.js"></script>
+</body>
+</html>
