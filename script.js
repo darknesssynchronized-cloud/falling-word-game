@@ -14,8 +14,6 @@ const GAME_CONFIG = {
 };
 
 // Difficulty presets — chosen by the player on the start screen.
-// This is separate from a word's own easy/medium/hard difficulty column;
-// this controls the overall game pace (lives, speed, spawn rate, leveling).
 const DIFFICULTY_PRESETS = {
   easy: {
     label: "Easy",
@@ -40,12 +38,8 @@ const DIFFICULTY_PRESETS = {
   }
 };
 
-// Set this to your local CSV path, or swap in your published
-// Google Sheet CSV URL, e.g.:
-// "https://docs.google.com/spreadsheets/d/e/2PACX-.../pub?output=csv"
 const CSV_SOURCE = "data/words.csv";
 
-// Used only if the CSV fails to load, so the game is still playable.
 const FALLBACK_WORDS = [
   { word: "apple", difficulty: "easy" },
   { word: "computer", difficulty: "easy" },
@@ -63,8 +57,9 @@ const FALLBACK_WORDS = [
 // STATE
 // =========================================================
 let wordList = [];
-let activeWords = [];       // [{ id, text, difficulty, x, y, speed, spawnTime, el }]
-let recentWords = [];       // last few words used, to avoid picking the same word back-to-back
+let filteredWordList = [];  // รายการคำศัพท์ที่กรองแล้วตามระดับความยากที่เลือก
+let activeWords = [];       
+let recentWords = [];       
 let score = 0;
 let lives = 3;
 let level = 1;
@@ -72,8 +67,8 @@ let running = false;
 let animationFrameId = null;
 let spawnTimeoutId = null;
 let nextWordId = 1;
-let selectedDifficulty = "normal";
-let activePreset = DIFFICULTY_PRESETS.normal;
+let selectedDifficulty = "easy";
+let activePreset = DIFFICULTY_PRESETS.easy;
 
 // =========================================================
 // DOM REFERENCES
@@ -110,7 +105,7 @@ async function loadWordList() {
     wordList = parsed;
   } catch (err) {
     console.warn("Could not load word list from CSV_SOURCE:", err.message);
-    console.warn("Falling back to built-in word list. Check that", CSV_SOURCE, "is reachable and correctly published.");
+    console.warn("Falling back to built-in word list.");
     wordList = FALLBACK_WORDS;
     loadErrorScreen.classList.remove("hidden");
   }
@@ -120,15 +115,14 @@ function parseCSV(text) {
   const lines = text.split(/\r?\n/).filter(line => line.trim().length > 0);
   const rows = [];
 
-  // Skip the header row (index 0)
   for (let i = 1; i < lines.length; i++) {
     const parts = lines[i].split(",");
-    const word = (parts[0] || "").trim().toLowerCase();
+    const word = (parts[0] || "").trim();
     let difficulty = (parts[1] || "").trim().toLowerCase();
 
-    if (!word) continue; // skip rows with no word
+    if (!word) continue; 
     if (!["easy", "medium", "hard"].includes(difficulty)) {
-      difficulty = "easy"; // default for missing/invalid difficulty
+      difficulty = "easy"; 
     }
     rows.push({ word, difficulty });
   }
@@ -137,30 +131,11 @@ function parseCSV(text) {
 
 // =========================================================
 // WORD SELECTION
-// (weighted more toward harder words at higher levels, and
-//  avoids repeating a word that was just used recently)
 // =========================================================
 function pickRandomWord() {
-  const hardChance = Math.min(0.1 + level * 0.06, 0.5);
-  const mediumChance = Math.min(0.25 + level * 0.05, 0.4);
+  // ดึงเฉพาะคำศัพท์จาก filteredWordList เท่านั้น ไม่เอาคำระดับอื่นมาปน
+  const pool = filteredWordList.length > 0 ? filteredWordList : wordList;
 
-  const roll = Math.random();
-  let pool;
-
-  if (roll < hardChance) {
-    pool = wordList.filter(w => w.difficulty === "hard");
-  } else if (roll < hardChance + mediumChance) {
-    pool = wordList.filter(w => w.difficulty === "medium");
-  } else {
-    pool = wordList.filter(w => w.difficulty === "easy");
-  }
-
-  if (!pool || pool.length === 0) pool = wordList; // safety fallback
-
-  // Prefer a word that ISN'T in the recent-use list, so the same word
-  // doesn't keep reappearing back-to-back. If every word in the chosen
-  // pool has been used recently (e.g. a very small word list), fall
-  // back to the full pool rather than getting stuck.
   const freshPool = pool.filter(w => !recentWords.includes(w.word));
   const finalPool = freshPool.length > 0 ? freshPool : pool;
 
@@ -168,7 +143,7 @@ function pickRandomWord() {
 
   recentWords.push(chosen.word);
   if (recentWords.length > GAME_CONFIG.noRepeatWindow) {
-    recentWords.shift(); // forget the oldest entry once the window is full
+    recentWords.shift();
   }
 
   return chosen;
@@ -188,7 +163,6 @@ function spawnWord() {
   el.textContent = chosen.word;
   gameArea.appendChild(el);
 
-  // Measure after appending so we know its rendered width
   const wordWidth = el.offsetWidth;
   const maxX = Math.max(areaWidth - wordWidth - 8, 0);
   const x = Math.floor(Math.random() * maxX);
@@ -199,7 +173,8 @@ function spawnWord() {
 
   activeWords.push({
     id: nextWordId++,
-    text: chosen.word,
+    text: chosen.word.toLowerCase(),
+    displayText: chosen.word,
     difficulty: chosen.difficulty,
     x: x,
     y: 0,
@@ -220,7 +195,7 @@ function scheduleNextSpawn() {
 }
 
 // =========================================================
-// GAME LOOP (movement)
+// GAME LOOP
 // =========================================================
 function gameLoop() {
   if (!running) return;
@@ -306,7 +281,7 @@ function updateHUD() {
 }
 
 // =========================================================
-// DIFFICULTY SELECTION (start screen)
+// DIFFICULTY SELECTION
 // =========================================================
 difficultyButtons.forEach(btn => {
   btn.addEventListener("click", () => {
@@ -320,7 +295,14 @@ difficultyButtons.forEach(btn => {
 // GAME LIFECYCLE
 // =========================================================
 function startGame() {
-  activePreset = DIFFICULTY_PRESETS[selectedDifficulty] || DIFFICULTY_PRESETS.normal;
+  // ปรับระดับ preset ของเกม (Easy, Normal, Hard) ให้ตรงกับปุ่ม
+  const presetKey = selectedDifficulty === "easy" ? "easy" : (selectedDifficulty === "hard" ? "hard" : "normal");
+  activePreset = DIFFICULTY_PRESETS[presetKey];
+
+  // กรองคำศัพท์เฉพาะระดับที่เลือกไว้
+  filteredWordList = wordList.filter(
+    w => w.difficulty.toLowerCase() === selectedDifficulty.toLowerCase()
+  );
 
   score = 0;
   lives = activePreset.startingLives;
