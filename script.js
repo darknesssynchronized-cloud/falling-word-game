@@ -296,12 +296,15 @@ difficultyButtons.forEach(btn => {
 // =========================================================
 function startGame() {
   // ปรับระดับ preset ของเกม (Easy, Normal, Hard) ให้ตรงกับปุ่ม
-  const presetKey = selectedDifficulty === "easy" ? "easy" : (selectedDifficulty === "hard" ? "hard" : "normal");
+  const presetKey = (selectedDifficulty === "easy" || selectedDifficulty === "hard") ? selectedDifficulty : "normal";
   activePreset = DIFFICULTY_PRESETS[presetKey];
+
+  // 🟢 แปลงค่า "normal" บนหน้าจอ UI ให้ตรงกับ "medium" ในฐานข้อมูลคำศัพท์ CSV
+  const targetDifficulty = selectedDifficulty === "normal" ? "medium" : selectedDifficulty;
 
   // กรองคำศัพท์เฉพาะระดับที่เลือกไว้
   filteredWordList = wordList.filter(
-    w => w.difficulty.toLowerCase() === selectedDifficulty.toLowerCase()
+    w => w.difficulty.toLowerCase() === targetDifficulty.toLowerCase()
   );
 
   score = 0;
